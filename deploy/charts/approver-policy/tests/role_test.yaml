@@ -1,0 +1,36 @@
+suite: test role
+release:
+  name: release-name
+  namespace: default
+chart:
+  name: approver-policy
+  version: 0.0.0
+templates:
+  - role.yaml
+tests:
+  - it: should render a valid Role
+    asserts:
+      - isKind:
+          of: Role
+      - equal:
+          path: metadata.name
+          value: cert-manager-approver-policy
+      - equal:
+          path: metadata.namespace
+          value: default
+      - matchSnapshot:
+          path: metadata.labels
+      - contains:
+          path: rules
+          content:
+            - apiGroups: ["coordination.k8s.io"]
+              resources: ["leases"]
+              verbs: ["create"]
+            - apiGroups: ["coordination.k8s.io"]
+              resources: ["leases"]
+              verbs: ["get", "update"]
+              resourceNames: ["policy.cert-manager.io"]
+            - apiGroups: [""]
+              resources: ["secrets"]
+              verbs: ["get", "list", "watch", "create", "update"]
+              resourceNames: ["cert-manager-approver-policy-tls"] 

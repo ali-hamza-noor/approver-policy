@@ -1,0 +1,46 @@
+suite: test metrics-service
+templates:
+  - metrics-service.yaml
+tests:
+  - it: should render a valid Service when enabled
+    set:
+      app:
+        metrics:
+          service:
+            enabled: true
+            type: ClusterIP
+          port: 9402
+    asserts:
+      - isKind:
+          of: Service
+      - equal:
+          path: metadata.name
+          value: cert-manager-approver-policy-metrics
+      - equal:
+          path: metadata.namespace
+          value: default
+      - contains:
+          path: metadata.labels
+          content:
+            app.kubernetes.io/name: cert-manager-approver-policy
+            helm.sh/chart: approver-policy-0.0.0
+            app.kubernetes.io/instance: release-name
+            app.kubernetes.io/managed-by: Helm
+      - equal:
+          path: spec.type
+          value: ClusterIP
+      - equal:
+          path: spec.ports[0].port
+          value: 9402
+      - equal:
+          path: spec.ports[0].targetPort
+          value: 9402
+      - equal:
+          path: spec.ports[0].protocol
+          value: TCP
+      - equal:
+          path: spec.ports[0].name
+          value: metrics
+      - equal:
+          path: spec.selector.app
+          value: cert-manager-approver-policy 

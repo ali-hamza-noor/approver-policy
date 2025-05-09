@@ -1,0 +1,37 @@
+suite: test poddisruptionbudget
+release:
+  name: release-name
+  namespace: default
+chart:
+  name: approver-policy
+  version: 0.0.0
+templates:
+  - poddisruptionbudget.yaml
+tests:
+  - it: should render a valid PodDisruptionBudget when enabled
+    set:
+      podDisruptionBudget.enabled: true
+      podDisruptionBudget.minAvailable: 1
+    asserts:
+      - isKind:
+          of: PodDisruptionBudget
+      - equal:
+          path: metadata.name
+          value: cert-manager-approver-policy
+      - equal:
+          path: metadata.namespace
+          value: default
+      - matchSnapshot:
+          path: metadata.labels
+      - equal:
+          path: spec.minAvailable
+          value: 1
+      - equal:
+          path: spec.selector.matchLabels.app
+          value: cert-manager-approver-policy
+  - it: should not render when disabled
+    set:
+      podDisruptionBudget.enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0 

@@ -1,0 +1,91 @@
+suite: test webhook
+release:
+  name: release-name
+  namespace: default
+chart:
+  name: approver-policy
+  version: 0.0.0
+templates:
+  - webhook.yaml
+tests:
+  - it: should render a valid webhook service
+    asserts:
+      - isKind:
+          of: Service
+      - equal:
+          path: metadata.name
+          value: cert-manager-approver-policy
+      - equal:
+          path: metadata.namespace
+          value: default
+      - matchSnapshot:
+          path: metadata.labels
+      - equal:
+          path: spec.type
+          value: ClusterIP
+      - equal:
+          path: spec.ports[0].port
+          value: 443
+      - equal:
+          path: spec.ports[0].targetPort
+          value: 10250
+      - equal:
+          path: spec.ports[0].protocol
+          value: TCP
+      - equal:
+          path: spec.ports[0].name
+          value: webhook
+      - equal:
+          path: spec.selector.app.kubernetes.io/name
+          value: cert-manager-approver-policy
+  - it: should render a valid ValidatingWebhookConfiguration
+    asserts:
+      - isKind:
+          of: ValidatingWebhookConfiguration
+      - equal:
+          path: metadata.name
+          value: cert-manager-approver-policy
+      - matchSnapshot:
+          path: metadata.labels
+      - equal:
+          path: webhooks[0].name
+          value: policy.cert-manager.io
+      - equal:
+          path: webhooks[0].admissionReviewVersions[0]
+          value: v1
+      - equal:
+          path: webhooks[0].timeoutSeconds
+          value: 5
+      - equal:
+          path: webhooks[0].failurePolicy
+          value: Fail
+      - equal:
+          path: webhooks[0].sideEffects
+          value: None
+      - equal:
+          path: webhooks[0].clientConfig.service.name
+          value: cert-manager-approver-policy
+      - equal:
+          path: webhooks[0].clientConfig.service.namespace
+          value: default
+      - equal:
+          path: webhooks[0].clientConfig.service.path
+          value: /validate-policy-cert-manager-io-v1alpha1-certificaterequestpolicy
+      - equal:
+          path: webhooks[0].clientConfig.service.port
+          value: 443
+  - it: should render a valid TLS secret
+    asserts:
+      - isKind:
+          of: Secret
+      - equal:
+          path: metadata.name
+          value: cert-manager-approver-policy-tls
+      - equal:
+          path: metadata.namespace
+          value: default
+      - matchSnapshot:
+          path: metadata.labels
+      - equal:
+          path: type
+          value: kubernetes.io/tls 

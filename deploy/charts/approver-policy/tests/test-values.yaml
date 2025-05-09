@@ -1,0 +1,54 @@
+replicaCount: 1
+allowAllIssuerRbac: true
+
+image:
+  repository: quay.io/jetstack/cert-manager-approver-policy
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+
+app:
+  logFormat: text
+  logLevel: 1
+  extraArgs: []
+  approveSignerNames: []
+
+  metrics:
+    port: 9402
+    service:
+      enabled: true
+      type: ClusterIP
+      servicemonitor:
+        enabled: false
+        prometheusInstance: default
+        interval: 10s
+        scrapeTimeout: 5s
+        labels: {}
+
+  readinessProbe:
+    port: 6060
+
+  webhook:
+    host: 0.0.0.0
+    port: 10250
+    timeoutSeconds: 5
+    service:
+      type: ClusterIP
+
+hostNetwork: false
+dnsPolicy: ClusterFirst
+priorityClassName: ""
+
+affinity: {}
+
+nodeSelector:
+  kubernetes.io/os: linux
+
+tolerations: []
+topologySpreadConstraints: []
+
+podDisruptionBudget:
+  enabled: false
+
+volumeMounts: []
+volumes: [] 

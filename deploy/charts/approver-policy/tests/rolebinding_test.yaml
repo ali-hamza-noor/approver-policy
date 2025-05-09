@@ -1,0 +1,37 @@
+suite: test rolebinding
+release:
+  name: release-name
+  namespace: default
+chart:
+  name: approver-policy
+  version: 0.0.0
+templates:
+  - rolebinding.yaml
+tests:
+  - it: should render a valid RoleBinding
+    asserts:
+      - isKind:
+          of: RoleBinding
+      - equal:
+          path: metadata.name
+          value: cert-manager-approver-policy
+      - equal:
+          path: metadata.namespace
+          value: default
+      - matchSnapshot:
+          path: metadata.labels
+      - equal:
+          path: roleRef.apiGroup
+          value: rbac.authorization.k8s.io
+      - equal:
+          path: roleRef.kind
+          value: Role
+      - equal:
+          path: roleRef.name
+          value: cert-manager-approver-policy
+      - contains:
+          path: subjects
+          content:
+            - kind: ServiceAccount
+              name: cert-manager-approver-policy
+              namespace: default 

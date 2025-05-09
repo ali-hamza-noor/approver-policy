@@ -1,0 +1,49 @@
+suite: test clusterrole
+release:
+  name: release-name
+  namespace: default
+chart:
+  name: approver-policy
+  version: 0.0.0
+templates:
+  - clusterrole.yaml
+tests:
+  - it: should render a valid ClusterRole
+    asserts:
+      - isKind:
+          of: ClusterRole
+      - equal:
+          path: metadata.name
+          value: cert-manager-approver-policy
+      - matchSnapshot:
+          path: metadata.labels
+      - contains:
+          path: rules
+          content:
+            - apiGroups: ["policy.cert-manager.io"]
+              resources: ["certificaterequestpolicies"]
+              verbs: ["list", "watch"]
+            - apiGroups: ["policy.cert-manager.io"]
+              resources: ["certificaterequestpolicies/status"]
+              verbs: ["patch"]
+            - apiGroups: ["cert-manager.io"]
+              resources: ["certificaterequests"]
+              verbs: ["list", "watch"]
+            - apiGroups: ["cert-manager.io"]
+              resources: ["certificaterequests/status"]
+              verbs: ["patch"]
+            - apiGroups: ["cert-manager.io"]
+              resources: ["signers"]
+              verbs: ["approve"]
+            - apiGroups: ["rbac.authorization.k8s.io"]
+              resources: ["roles", "clusterroles", "rolebindings", "clusterrolebindings"]
+              verbs: ["list", "watch"]
+            - apiGroups: [""]
+              resources: ["events"]
+              verbs: ["create", "patch"]
+            - apiGroups: ["authorization.k8s.io"]
+              resources: ["subjectaccessreviews"]
+              verbs: ["create"]
+            - apiGroups: [""]
+              resources: ["namespaces"]
+              verbs: ["list", "watch"] 

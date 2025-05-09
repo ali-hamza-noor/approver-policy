@@ -1,0 +1,42 @@
+suite: test allow-all-clusterrolebinding
+release:
+  name: release-name
+  namespace: default
+chart:
+  name: approver-policy
+  version: 0.0.0
+templates:
+  - allow-all-clusterrolebinding.yaml
+tests:
+  - it: should render a valid ClusterRoleBinding when allowAllIssuerRbac is true
+    set:
+      allowAllIssuerRbac: true
+    asserts:
+      - isKind:
+          of: ClusterRoleBinding
+      - equal:
+          path: metadata.name
+          value: cert-manager-approver-policy-allow-all
+      - matchSnapshot:
+          path: metadata.labels
+      - equal:
+          path: roleRef.apiGroup
+          value: rbac.authorization.k8s.io
+      - equal:
+          path: roleRef.kind
+          value: ClusterRole
+      - equal:
+          path: roleRef.name
+          value: cert-manager-approver-policy-allow-all
+      - contains:
+          path: subjects
+          content:
+            - kind: ServiceAccount
+              name: cert-manager-approver-policy
+              namespace: default
+  - it: should not render when allowAllIssuerRbac is false
+    set:
+      allowAllIssuerRbac: false
+    asserts:
+      - hasDocuments:
+          count: 0 

@@ -1,0 +1,55 @@
+suite: test deployment
+release:
+  name: release-name
+  namespace: default
+chart:
+  name: approver-policy
+  version: 0.0.0
+templates:
+  - deployment.yaml
+tests:
+  - it: should render a valid Deployment
+    asserts:
+      - isKind:
+          of: Deployment
+      - equal:
+          path: metadata.name
+          value: cert-manager-approver-policy
+      - equal:
+          path: metadata.namespace
+          value: default
+      - matchSnapshot:
+          path: metadata.labels
+      - equal:
+          path: spec.replicas
+          value: 1
+      - matchSnapshot:
+          path: spec.selector
+      - matchSnapshot:
+          path: spec.template.metadata
+      - matchSnapshot:
+          path: spec.template.spec.containers[0].args
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: quay.io/jetstack/cert-manager-approver-policy:v0.0.0
+      - equal:
+          path: spec.template.spec.containers[0].imagePullPolicy
+          value: IfNotPresent
+      - equal:
+          path: spec.template.spec.containers[0].name
+          value: cert-manager-approver-policy
+      - matchSnapshot:
+          path: spec.template.spec.containers[0].ports
+      - matchSnapshot:
+          path: spec.template.spec.containers[0].readinessProbe
+      - matchSnapshot:
+          path: spec.template.spec.nodeSelector
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: cert-manager-approver-policy
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.allowPrivilegeEscalation
+          value: false
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.capabilities.drop[0]
+          value: ALL 

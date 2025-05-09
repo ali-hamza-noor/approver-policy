@@ -1,0 +1,57 @@
+suite: test metrics-servicemonitor
+release:
+  name: release-name
+  namespace: default
+chart:
+  name: approver-policy
+  version: 0.0.0
+templates:
+  - metrics-servicemonitor.yaml
+tests:
+  - it: should render a valid ServiceMonitor when enabled
+    set:
+      app.metrics.service.servicemonitor.enabled: true
+    asserts:
+      - isKind:
+          of: ServiceMonitor
+      - equal:
+          path: metadata.name
+          value: cert-manager-approver-policy
+      - equal:
+          path: metadata.namespace
+          value: default
+      - matchSnapshot:
+          path: metadata.labels
+      - equal:
+          path: spec.jobLabel
+          value: cert-manager-approver-policy
+      - equal:
+          path: spec.selector.matchLabels.app
+          value: cert-manager-approver-policy
+      - equal:
+          path: spec.namespaceSelector.matchNames[0]
+          value: default
+      - equal:
+          path: spec.endpoints[0].port
+          value: metrics
+      - equal:
+          path: spec.endpoints[0].path
+          value: /metrics
+      - equal:
+          path: spec.endpoints[0].interval
+          value: 10s
+      - equal:
+          path: spec.endpoints[0].scrapeTimeout
+          value: 5s
+  - it: should not render when metrics service is disabled
+    set:
+      app.metrics.service.enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+  - it: should not render when servicemonitor is disabled
+    set:
+      app.metrics.service.servicemonitor.enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0 
